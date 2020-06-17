@@ -7,6 +7,22 @@ Filter = 'Documents (*.txt)|*.txt' }
 
 $null = $FileBrowser.ShowDialog()
 
+<#get-content -Path $FileBrowser.FileName | ForEach-Object {
+    $test = Test-Connection -ComputerName $_ -Quiet -Count 1
+    if($test) {
+    New-Object -TypeName PSCustomObject -Property @{
+        MachineName = $_;
+        'Ping Status' = 'Success';
+    }
+}
+    else {
+    New-Object -TypeName PSCustomObject -Property @{
+        MachineName = $_;
+        'Ping Status' = 'Fail';
+        }
+    }
+} | Export-Csv C:\Powershell\ping.csv #>
+
 $computer = get-content -path $filebrowser.FileName
 
 
@@ -36,7 +52,7 @@ $output = $computer | ForEach-Object {
                 MachineName = $computer
                 PingTest    = $false
             }
-        Write-Verbose ('Not in AD')
+        Write-Verbose ('{0} is not in AD' -f $computer)
         }
     }
 
@@ -45,7 +61,7 @@ $output = $computer | ForEach-Object {
             MachineName = $computer
             PingTest    = $false
         }
-        Write-Verbose ('Unable to locate machine {0}' -f $computer)
+        Write-Verbose ('{0} is not in AD' -f $computer)
     }
 }
     $output | export-csv -path C:\Powershell\pingAD.csv
